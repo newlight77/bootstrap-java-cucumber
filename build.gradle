@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+ext {
+    javaMainClass = "io.github.newlight77.SimpleSearchApp"
+}
+
+application {
+    mainClassName = javaMainClass
+}
+
+group 'io.github.newlight77'
+version '1.0.0-SNAPSHOT'
+sourceCompatibility = '13'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.3.3'
+
+    testImplementation('org.assertj:assertj-core:3.11.1')
+
+    testImplementation 'io.cucumber:cucumber-java:5.5.0'
+}
+
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, compileTestJava
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'gradle.cucumber', 'src/test/resources']
+        }
+    }
+}
